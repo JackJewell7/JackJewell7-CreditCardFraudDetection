@@ -1,0 +1,61 @@
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+
+#read in the dataset
+cc_data = pd.read_csv('/content/creditcard.csv')
+
+cc_data.head()
+cc_data.tail()
+
+#checking for any missing datapoints
+cc_data.info()
+cc_data.isnull().sum()
+
+#displaying the data to create a usable sample
+cc_data['Class'].value_counts()
+
+verified = cc_data[cc_data.Class == 0]
+fraud = cc_data[cc_data.Class == 1]
+
+print(verified.shape)
+print(fraud.shape)
+
+verified.Amount.describe()
+fraud.Amount.describe()
+
+cc_data.groupby('Class').mean()
+verified_sample = verified.sample(n=492)
+cc_dataframe = pd.concat([verified_sample, fraud], axis = 0)
+
+cc_dataframe.head()
+cc_dataframe.tail()
+
+cc_dataframe['Class'].value_counts()
+cc_dataframe.groupby('Class').mean()
+
+#creating training and testing data for the model
+X = cc_dataframe.drop(columns = 'Class', axis=1)
+Y = cc_dataframe['Class']
+
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, stratify=Y, random_state=2)
+print(X.shape, X_train.shape, X_test.shape)
+
+model = LogisticRegression()
+model.fit(X_train, Y_train)
+
+#testing the model's accuracy
+X_trpredict = model.predict(X_train)
+trdata_accuracy = accuracy_score(X_trpredict, Y_train)
+print('Accuracy on Training data : ', trdata_accuracy)
+
+x_tpredict = model.predict(X_test)
+tdata_accuracy = accuracy_score(x_tpredict, Y_test)
+print('Accuracy score on test data : ', tdata_accuracy)
+
+
+
+
+
